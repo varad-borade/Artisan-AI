@@ -1,75 +1,51 @@
-Artisan AI 🎨
-An AI-powered creative partner designed to empower local artisans in the digital marketplace. This project was built for the Google Gen AI Exchange Hackathon.
+🎨 Artisan AI
+A web-based creative partner that empowers local artisans to thrive in the digital marketplace. This application uses Google's Generative AI to provide visual inspiration, content creation, and social media assistance.
 
-Live Demo: https://varad-borade.github.io/Artisan-AI/ (Replace 'your-username' with your actual GitHub username)
+Live Demo: https://varad-borade.github.io/Artisan-AI/
 
-The Challenge
-Indian artisans and craftspeople, rich in traditional skills, often face significant challenges in the modern digital marketplace. A lack of digital marketing skills, limited resources, and the difficulty of bridging traditional craftsmanship with contemporary consumer trends severely restrict their market reach and profitability. This creates a disconnect between valuable, traditional art forms and a wider, digitally-native audience, threatening the sustainability of these crafts.
+🚀 Core Features
+Visual Muse: Generates unique, AI-powered images of product ideas based on current market trends.
 
-Our Solution: Artisan AI
-Artisan AI is an intuitive web-based toolkit that acts as a creative partner for local artisans. It leverages the power of Google's generative AI to handle the most challenging aspects of digital marketing, allowing artisans to focus on what they do best: creating beautiful art. Our application is designed to be simple, inspiring, and a true real-world utility.
+Storyteller: Crafts compelling product descriptions and brand stories from simple user inputs.
 
-✨ Core Features
-Our prototype is built around three powerful, user-centric features:
+Social Media Guru: Creates platform-specific (Instagram, Facebook) posts from a product photo, complete with engaging captions and trending hashtags.
 
-1. 🔭 The Visual Muse (Visual Trend Spotter)
-Provides artisans with actionable, visual inspiration. Instead of just describing trends, it generates concrete design ideas and example images, helping to bridge the gap between traditional techniques and modern aesthetics.
+Ease of Use: Features a simple, intuitive interface with one-click "Copy to Clipboard" functionality.
 
-2. ✍️ The Storyteller
-Helps artisans craft compelling narratives. By providing a few simple details about their craft and inspiration, it generates beautiful product descriptions and brand stories, giving their work a professional and authentic voice.
-
-3. 📱 The Social Media Guru
-Simplifies the most time-consuming part of digital marketing. Artisans can upload a photo of their product, select a social media platform (like Instagram or Facebook), and instantly get a tailored, engaging post complete with an evocative caption, emojis, and relevant, trending hashtags.
-
-🛠️ Technology Stack
-This project was built using a modern, scalable, and accessible technology stack:
-
+🛠️ Technologies Used
 Frontend: HTML, Tailwind CSS, JavaScript
 
-Generative AI Backend:
+AI Models:
 
-Google Gemini 2.5 Flash: For all text generation, multimodal analysis, and structured JSON output.
+Google Gemini 2.5 Flash (Text, Analysis, JSON)
 
-Google Gemini 2.0 Flash (Image Generation): For creating the inspirational images in the Visual Muse feature.
+Google Gemini 2.0 Flash (Image Generation)
 
 Deployment: GitHub Pages
 
-🚀 Getting Started (Running Locally)
-To run this project on your local machine, follow these steps:
+📂 Project Structure
+Artisan-AI/
+└── index.html    # A single, self-contained file with all HTML, CSS, and JavaScript.
 
-Clone the repository:
+📌 How It Works
+Visual Muse: The user selects a craft type (e.g., "Pottery"). The app calls the Gemini API to generate two trending design ideas in a structured JSON format. It then uses the image prompts from the JSON to call the image generation API, displaying the final visual concepts to the user.
 
-git clone https://github.com/your-username/Artisan-AI.git
+Storyteller: The user enters their brand name, craft type, and inspiration. This information is sent to the Gemini API in a grounded prompt to generate a short, professional product description.
 
-Get a Google AI API Key:
+Social Media Guru: The user uploads a product photo and selects a social media platform. The app sends the image and a detailed prompt to the Gemini API's multimodal endpoint, which analyzes the image and generates a tailored post.
 
-Visit Google AI Studio and create a free API key.
+🧑‍💻 Example Interaction
+Visual Muse in Action:
+An artisan selects "Jewelry Making" and receives two visual concepts for trending necklace designs.
 
-Important: For the image generation feature to work, you must enable a billing account on your Google Cloud project. You will not be charged, as the usage falls within the free tier, but this is required by Google to enable the image generation APIs.
+Social Media Guru Output:
+An artisan uploads a photo of a ceramic vase and gets a ready-to-use Instagram post.
 
-Add the API Key to the Code:
+Bringing a touch of earthy elegance to your space. ✨ This handcrafted ceramic vase, with its beautiful matte finish and minimalist form, is a testament to the beauty of slow, intentional craftsmanship. Each piece is shaped and glazed by hand, making it truly one-of-a-kind.
 
-Open the index.html file in a code editor.
+Perfect for holding fresh blooms or as a standalone statement piece! DM us to make it yours. 💌
 
-Find the line const API_KEY = ""; at the top of the <script> section.
+#CeramicArt #HandmadePottery #ArtisanMade #SupportLocalArtisans #HomeDecor #MadeInIndia
 
-Paste your API key between the quotation marks.
-
-Run a Local Server:
-
-Navigate to the project folder in your terminal.
-
-Run the following command (requires Python 3):
-
-python -m http.server
-
-Open your browser and go to http://localhost:8000.
-
-🛡️ AI Safety and Responsibility
-We built this application with a strong focus on responsible AI principles:
-
-AI Grounding: All AI prompts are heavily "grounded" with specific context, instructions, and user-provided data to ensure outputs are relevant, accurate, and to prevent hallucinations.
-
-Security: The application uses input sanitization to protect against basic prompt injection attacks, and the AI's instructions are designed to reject attempts to misuse it.
-
-Creative Assistance, Not Replacement: We believe AI should be a muse, not a master. Our tool is designed to solve the "blank page" problem and provide a spark of inspiration, while always leaving the true artistry, skill, and soul of the work in the hands of the artisan.
+📄 License
+This project is open-source and available under the MIT License.
