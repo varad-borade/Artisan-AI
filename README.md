@@ -1,8 +1,5 @@
 # 🎨 Artisan AI – Your Creative Partner for Digital Success  
 
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/artisan-ai?color=orange)  
-![GitHub repo size](https://img.shields.io/github/repo-size/yourusername/artisan-ai?color=blue)  
-![GitHub license](https://img.shields.io/github/license/yourusername/artisan-ai?color=green)  
 ![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5-orange)  
 ![Made with JavaScript](https://img.shields.io/badge/Made%20with-JavaScript-yellow)  
 
@@ -82,7 +79,7 @@ This project is open-source and available under the **MIT License**.
 ---
 
 ## 🌟 Live Demo  
-🔗 [View Live Project](https://yourusername.github.io/artisan-ai/)  
+🔗 [View Live Project](https://varad-borade.github.io/Artisan-AI/)  
 
 ---
 
