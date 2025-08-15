@@ -1,51 +1,98 @@
-🎨 Artisan AI
-A web-based creative partner that empowers local artisans to thrive in the digital marketplace. This application uses Google's Generative AI to provide visual inspiration, content creation, and social media assistance.
+🎨 Artisan AI – Your Creative Partner for Digital Success
 
-Live Demo: https://varad-borade.github.io/Artisan-AI/
 
-🚀 Core Features
-Visual Muse: Generates unique, AI-powered images of product ideas based on current market trends.
 
-Storyteller: Crafts compelling product descriptions and brand stories from simple user inputs.
 
-Social Media Guru: Creates platform-specific (Instagram, Facebook) posts from a product photo, complete with engaging captions and trending hashtags.
 
-Ease of Use: Features a simple, intuitive interface with one-click "Copy to Clipboard" functionality.
+
+
+
+
+
+✨ An AI-powered web tool for artisans, creators, and craft entrepreneurs to generate design ideas, write authentic product descriptions, and create engaging social media content.
+
+📸 Screenshots
+[Homepage – Visual Muse & The Storyteller](https://raw.githubusercontent.com/varad-borade/Artisan-AI/refs/heads/main/homepage.png)
+
+Social Media Guru – Post Generator
+
+🚀 Features
+
+🎨 Visual Muse – Get AI-generated creative ideas with images for your craft.
+
+✍️ The Storyteller – Generate warm, authentic 50–70 word product descriptions.
+
+📱 Social Media Guru – Create engaging captions with trending hashtags.
+
+📤 Upload product images & preview before generating captions.
+
+📋 One-click copy-to-clipboard for all generated content.
 
 🛠️ Technologies Used
-Frontend: HTML, Tailwind CSS, JavaScript
 
-AI Models:
+HTML5 – Structure & layout
 
-Google Gemini 2.5 Flash (Text, Analysis, JSON)
+Tailwind CSS – Styling & responsive UI
 
-Google Gemini 2.0 Flash (Image Generation)
+JavaScript (Vanilla) – Interactive logic
 
-Deployment: GitHub Pages
+Google Gemini API – AI text & image generation
+
+FileReader API – In-browser image handling
 
 📂 Project Structure
-Artisan-AI/
-└── index.html    # A single, self-contained file with all HTML, CSS, and JavaScript.
+ArtisanAI/
+├── index.html        # Main application file
+├── assets/
+│   ├── screenshots/  # UI screenshots
+├── README.md         # Project documentation
 
 📌 How It Works
-Visual Muse: The user selects a craft type (e.g., "Pottery"). The app calls the Gemini API to generate two trending design ideas in a structured JSON format. It then uses the image prompts from the JSON to call the image generation API, displaying the final visual concepts to the user.
 
-Storyteller: The user enters their brand name, craft type, and inspiration. This information is sent to the Gemini API in a grounded prompt to generate a short, professional product description.
+Choose a feature – Visual Muse, Storyteller, or Social Media Guru.
 
-Social Media Guru: The user uploads a product photo and selects a social media platform. The app sends the image and a detailed prompt to the Gemini API's multimodal endpoint, which analyzes the image and generates a tailored post.
+Provide inputs – Select craft, enter brand details, or upload an image.
 
-🧑‍💻 Example Interaction
-Visual Muse in Action:
-An artisan selects "Jewelry Making" and receives two visual concepts for trending necklace designs.
+AI generates output – Get design ideas, product descriptions, or social posts.
 
-Social Media Guru Output:
-An artisan uploads a photo of a ceramic vase and gets a ready-to-use Instagram post.
+Copy & use – Paste your AI-generated content wherever you need it.
 
-Bringing a touch of earthy elegance to your space. ✨ This handcrafted ceramic vase, with its beautiful matte finish and minimalist form, is a testament to the beauty of slow, intentional craftsmanship. Each piece is shaped and glazed by hand, making it truly one-of-a-kind.
+🖼️ Example Usage
+Craft: Pottery & Ceramics
+Idea Title: Sunset Clay Mugs
+Idea Description: Warm earth-toned mugs inspired by the golden hues of Indian sunsets.
 
-Perfect for holding fresh blooms or as a standalone statement piece! DM us to make it yours. 💌
-
-#CeramicArt #HandmadePottery #ArtisanMade #SupportLocalArtisans #HomeDecor #MadeInIndia
+Generated Social Post (Instagram):
+"Every sip tells a story 🌅✨ Crafted with love, inspired by sunsets. 
+Bring home a piece of warmth today! 
+#HandmadeWithLove #PotteryArt #SunsetVibes"
 
 📄 License
+
 This project is open-source and available under the MIT License.
+
+🌟 Live Demo
+
+🔗 View Live Project
+
+🤝 Contributing
+
+Fork the repo
+
+Create a new branch (feature-xyz)
+
+Commit changes
+
+Submit a Pull Request
+
+📌 Next step:
+
+On your GitHub repo, create a folder assets/screenshots.
+
+Upload your two screenshots there, naming them:
+
+homepage.png
+
+social-media.png
+
+GitHub will automatically host them — copy their raw file URL from GitHub and replace the placeholder links above.
