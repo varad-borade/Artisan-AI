@@ -13,10 +13,10 @@
 ## 📸 Screenshots  
 
 ### **Homepage – Visual Muse & The Storyteller**  
-![Homepage Screenshot]((https://raw.githubusercontent.com/varad-borade/Artisan-AI/refs/heads/main/homepage.png))  
+![Homepage Screenshot](https://raw.githubusercontent.com/varad-borade/Artisan-AI/refs/heads/main/homepage.png)
 
 ### **Social Media Guru – Post Generator**  
-![Social Media Guru Screenshot](https://raw.githubusercontent.com/yourusername/yourrepo/main/assets/screenshots/social-media.png)  
+![Social Media Guru Screenshot](https://raw.githubusercontent.com/varad-borade/Artisan-AI/refs/heads/main/social-media.png)  
 
 ---
 
