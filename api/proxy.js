@@ -1,5 +1,5 @@
 // This is a Vercel Serverless Function, which acts as our secure proxy.
-const fetch = require('node-fetch');
+// We have removed `require('node-fetch')` to use Vercel's native fetch.
 
 // The main handler for all incoming requests
 module.exports = async (req, res) => {
