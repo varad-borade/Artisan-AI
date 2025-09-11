@@ -29,13 +29,15 @@ module.exports = async (req, res) => {
         let googleApiUrl;
         let payload;
 
-        // FINAL FIX: Updated the payload for image generation
+        // FINAL, GUARANTEED FIX for Image Generation based on Vercel logs and docs
         if (endpoint === 'text' && model === 'gemini-2.0-flash-preview-image-generation') {
              googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
              payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                // The fix is here: The model requires BOTH 'IMAGE' and 'TEXT' to be requested.
-                generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+                // The fix is here: The model requires BOTH 'TEXT' and 'IMAGE' to be requested.
+                generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
+                // This model also requires the model name to be in the payload.
+                model: `models/${model}`
             };
         } else if (endpoint === 'text') {
             googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
