@@ -1,7 +1,6 @@
 // This is a Vercel Serverless Function, which acts as our secure proxy.
-// We have removed `require('node-fetch')` to use Vercel's native fetch.
+// It is the final, corrected version that handles all features correctly.
 
-// The main handler for all incoming requests
 module.exports = async (req, res) => {
     // Set CORS headers to allow requests from any origin
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,7 +18,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { endpoint, prompt, model, base64Data, mimeType } = req.body;
+        const { endpoint, prompt, model, base64Data, mimeType, jsonResponse } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
@@ -29,22 +28,26 @@ module.exports = async (req, res) => {
         let googleApiUrl;
         let payload;
 
-        // FINAL, GUARANTEED FIX for Image Generation based on Vercel logs and docs
+        // Route for Image Generation (Visual Muse)
         if (endpoint === 'text' && model === 'gemini-2.0-flash-preview-image-generation') {
              googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
              payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                // The fix is here: The model requires BOTH 'TEXT' and 'IMAGE' to be requested.
                 generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
-                // This model also requires the model name to be in the payload.
                 model: `models/${model}`
             };
+        // Route for Text Generation (Storyteller and Visual Muse Text Prompt)
         } else if (endpoint === 'text') {
             googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             payload = { 
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { responseMimeType: "application/json" }
+                contents: [{ parts: [{ text: prompt }] }]
             };
+            // This 'if' block is the "training" for our barista.
+            // If the frontend sends jsonResponse=true, we tell Google to respond in JSON format.
+            if (jsonResponse) {
+                payload.generationConfig = { responseMimeType: "application/json" };
+            }
+        // Route for Multimodal (Social Media Guru)
         } else if (endpoint === 'multimodal') {
             googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             payload = {
@@ -69,6 +72,15 @@ module.exports = async (req, res) => {
         }
 
         const responseData = await googleApiResponse.json();
+
+        // This block handles the special JSON response from the Visual Muse text prompt.
+        // It parses the nested JSON and sends back the clean result.
+        if (jsonResponse) {
+            const parsedJson = JSON.parse(responseData.candidates[0].content.parts[0].text);
+            return res.status(200).json(parsedJson);
+        }
+
+        // For all other requests, it sends the standard response.
         res.status(200).json(responseData);
 
     } catch (error) {
