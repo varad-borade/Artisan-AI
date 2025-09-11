@@ -29,11 +29,13 @@ module.exports = async (req, res) => {
         let googleApiUrl;
         let payload;
 
+        // FINAL FIX: Updated the payload for image generation
         if (endpoint === 'text' && model === 'gemini-2.0-flash-preview-image-generation') {
              googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
              payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { responseModalities: ['IMAGE'] },
+                // The fix is here: The model requires BOTH 'IMAGE' and 'TEXT' to be requested.
+                generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
             };
         } else if (endpoint === 'text') {
             googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
