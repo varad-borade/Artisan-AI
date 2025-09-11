@@ -254,7 +254,7 @@
                         <div>
                             <div id="image-upload-area" class="flex justify-center px-6 pt-5 pb-6 border-2 h-full border-stone-300 border-dashed rounded-md bg-stone-50/50">
                                 <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-l3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    <svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                                     <div class="flex text-sm text-stone-600"><label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-orange-700 hover:text-orange-800 focus-within:outline-none"><span>Upload product photo</span><input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg"></label></div>
                                     <p class="text-xs text-stone-500">PNG, JPG up to 10MB</p>
                                 </div>
@@ -278,7 +278,7 @@
 
     <script>
         // --- Global State & Configuration ---
-        const CLOUD_FUNCTION_URL = "/api/proxy"; // This points to our secure Vercel function
+        const CLOUD_FUNCTION_URL = "/api/proxy";
         let uploadedImageBase64 = null;
 
         // --- Security & Utility Functions ---
@@ -288,7 +288,6 @@
             return element.innerHTML;
         }
 
-        // --- UPDATED API Call Functions to use the Proxy ---
         async function callProxy(payload) {
             try {
                 const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -297,7 +296,7 @@
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) {
-                    console.error('Proxy Error Response:', await response.text());
+                    console.error("Proxy Error Response:", await response.text());
                     throw new Error(`Proxy request failed: ${response.status}`);
                 }
                 return await response.json();
@@ -306,7 +305,7 @@
                 return null;
             }
         }
-        
+
         async function generateImage(prompt) {
              const payload = { 
                 endpoint: 'text', 
@@ -317,6 +316,10 @@
             const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
             if (base64Data) {
                 return `data:image/png;base64,${base64Data}`;
+            }
+            // Handle cases where the model response is valid but contains a safety block
+            if (result && result.promptFeedback && result.promptFeedback.blockReason) {
+                console.warn(`Image generation blocked for safety reasons: ${result.promptFeedback.blockReason}`);
             }
             return null;
         }
@@ -335,11 +338,21 @@
             getTrendsBtn.disabled = true;
             getTrendsBtn.innerText = 'Inspiring...';
 
-            const textPrompt = `You are a creative director for Indian artisans. Your task is to provide two distinct, simple, and actionable design ideas for the craft of "${selectedCraft}". It is currently ${today}, so focus on fresh and modern interpretations. For each idea, provide a short, inspiring description (one sentence) and a specific, detailed prompt for an AI image generator to create a visually appealing product photo. Your response MUST be a valid JSON object, an array with two items, following this exact format: [{"idea_title": "...", "idea_description": "...", "image_prompt": "..."}, {"idea_title": "...", "idea_description": "...", "image_prompt": "..."}]`;
-            
+            // FINAL FIX: Added a line to the prompt to guide the AI towards creating safer prompts.
+            const textPrompt = `You are a creative director for Indian artisans. Your task is to provide two distinct, simple, and actionable design ideas for the craft of "${selectedCraft}". It is currently ${today}, so focus on fresh and modern interpretations. For each idea, provide a short, inspiring description (one sentence) and a specific, detailed prompt for an AI image generator to create a visually appealing product photo. Crucially, ensure the generated image_prompt is descriptive and adheres to AI safety policies to avoid being blocked. Your response MUST be a valid JSON object, an array with two items, following this exact format: [{"idea_title": "...", "idea_description": "...", "image_prompt": "..."}, {"idea_title": "...", "idea_description": "...", "image_prompt": "..."}]`;
+
             try {
-                 const textResult = await callProxy({ endpoint: 'text', model: 'gemini-2.5-flash-preview-05-20', prompt: textPrompt });
-                 const trendData = JSON.parse(textResult.candidates[0].content.parts[0].text);
+                const payload = { 
+                    endpoint: 'text', 
+                    model: 'gemini-2.5-flash-preview-05-20', 
+                    prompt: textPrompt,
+                    // We need to tell the proxy to expect JSON back for this specific call
+                    jsonResponse: true 
+                };
+                const textResult = await callProxy(payload);
+
+                // The proxy now returns the parsed JSON directly
+                const trendData = textResult; 
 
                 trendsResultBox.innerHTML = '';
                 trendsResultBox.classList.remove('loading');
@@ -352,8 +365,11 @@
 
                     const imageUrl = await generateImage(trend.image_prompt);
                     const imageElement = document.getElementById(`image-${trend.idea_title.replace(/\s+/g, '-')}`);
-                    if (imageUrl && imageElement) imageElement.src = imageUrl;
-                    else if(imageElement) imageElement.src = 'https://placehold.co/600x400/e7e2dd/c2410c?text=Image+Failed';
+                    if (imageUrl && imageElement) {
+                        imageElement.src = imageUrl;
+                    } else if (imageElement) {
+                        imageElement.src = 'https://placehold.co/600x400/e7e2dd/c2410c?text=Image+Failed';
+                    }
                 }
             } catch (error) {
                 console.error("Error in Trend Spotter:", error);
