@@ -254,7 +254,7 @@
                         <div>
                             <div id="image-upload-area" class="flex justify-center px-6 pt-5 pb-6 border-2 h-full border-stone-300 border-dashed rounded-md bg-stone-50/50">
                                 <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    <svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-l3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                                     <div class="flex text-sm text-stone-600"><label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-orange-700 hover:text-orange-800 focus-within:outline-none"><span>Upload product photo</span><input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg"></label></div>
                                     <p class="text-xs text-stone-500">PNG, JPG up to 10MB</p>
                                 </div>
@@ -277,7 +277,8 @@
     </main>
 
     <script>
-        // --- Global State ---
+        // --- Global State & Configuration ---
+        const CLOUD_FUNCTION_URL = "/api/proxy"; // This points to our secure Vercel function
         let uploadedImageBase64 = null;
 
         // --- Security & Utility Functions ---
@@ -287,17 +288,37 @@
             return element.innerHTML;
         }
 
-        async function generateImage(prompt) {
-            const apiKey = "AIzaSyAnP3G74zUK1YjrJ2zfQT4t3ne1eV9bljE";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        // --- UPDATED API Call Functions to use the Proxy ---
+        async function callProxy(payload) {
             try {
-                const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`Image API failed: ${response.status}`);
-                const result = await response.json();
-                if (result.predictions && result.predictions[0].bytesBase64Encoded) return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    console.error('Proxy Error Response:', await response.text());
+                    throw new Error(`Proxy request failed: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Error calling proxy function:", error);
                 return null;
-            } catch (error) { console.error("Error generating image:", error); return null; }
+            }
+        }
+        
+        async function generateImage(prompt) {
+             const payload = { 
+                endpoint: 'text', 
+                model: 'gemini-2.0-flash-preview-image-generation', 
+                prompt 
+            };
+            const result = await callProxy(payload);
+            const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+            if (base64Data) {
+                return `data:image/png;base64,${base64Data}`;
+            }
+            return null;
         }
 
         // --- Feature 1: Visual Trend Spotter Logic ---
@@ -315,15 +336,10 @@
             getTrendsBtn.innerText = 'Inspiring...';
 
             const textPrompt = `You are a creative director for Indian artisans. Your task is to provide two distinct, simple, and actionable design ideas for the craft of "${selectedCraft}". It is currently ${today}, so focus on fresh and modern interpretations. For each idea, provide a short, inspiring description (one sentence) and a specific, detailed prompt for an AI image generator to create a visually appealing product photo. Your response MUST be a valid JSON object, an array with two items, following this exact format: [{"idea_title": "...", "idea_description": "...", "image_prompt": "..."}, {"idea_title": "...", "idea_description": "...", "image_prompt": "..."}]`;
-
+            
             try {
-                const apiKey = "AIzaSyAnP3G74zUK1YjrJ2zfQT4t3ne1eV9bljE";
-                const textApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                const textPayload = { contents: [{ role: "user", parts: [{ text: textPrompt }] }], generationConfig: { responseMimeType: "application/json" } };
-                const textResponse = await fetch(textApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(textPayload) });
-                if (!textResponse.ok) throw new Error(`Text API failed: ${textResponse.status}`);
-                const textResult = await textResponse.json();
-                const trendData = JSON.parse(textResult.candidates[0].content.parts[0].text);
+                 const textResult = await callProxy({ endpoint: 'text', model: 'gemini-2.5-flash-preview-05-20', prompt: textPrompt });
+                 const trendData = JSON.parse(textResult.candidates[0].content.parts[0].text);
 
                 trendsResultBox.innerHTML = '';
                 trendsResultBox.classList.remove('loading');
@@ -373,13 +389,9 @@
 
             const prompt = `You are a marketing expert for Indian artisans. Write a warm, authentic product description (50-70 words) based on this information. Do not add facts not present. Artisan/Brand: "${artisanName}", Craft: "${craftType}", Details: "${inspiration}". Generate the description.`;
             
-            const apiKey = "AIzaSyAnP3G74zUK1YjrJ2zfQT4t3ne1eV9bljE";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             try {
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`API request failed: ${response.status}`);
-                const result = await response.json();
+                const payload = { endpoint: 'text', model: 'gemini-2.5-flash-preview-05-20', prompt };
+                const result = await callProxy(payload);
                 storyResultBox.innerText = result.candidates[0].content.parts[0].text;
             } catch (error) {
                 storyResultBox.innerText = "Sorry, I couldn't generate a description right now. Please try again.";
@@ -452,13 +464,14 @@
             const mimeType = uploadedImageBase64.substring(uploadedImageBase64.indexOf(":") + 1, uploadedImageBase64.indexOf(";"));
             const base64Data = uploadedImageBase64.substring(uploadedImageBase64.indexOf(",") + 1);
 
-            const apiKey = "AIzaSyAnP3G74zUK1YjrJ2zfQT4t3ne1eV9bljE";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             try {
-                const payload = { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } }] }] };
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`API request failed: ${response.status}`);
-                const result = await response.json();
+                const payload = {
+                    endpoint: 'multimodal',
+                    prompt,
+                    base64Data,
+                    mimeType
+                };
+                const result = await callProxy(payload);
                 
                 let postText = result.candidates[0].content.parts[0].text;
                 socialResultBox.innerText = postText.trim();
@@ -500,3 +513,4 @@
     </script>
 </body>
 </html>
+
