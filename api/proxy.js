@@ -1,5 +1,5 @@
 // This is the final, complete, and robust Vercel Serverless Function.
-// It includes the final bug fix for the Marketplace Assistant's "Generate Listing" action.
+// It includes the final, intelligent pricing logic with justification.
 
 // Helper function for making API calls with retry logic
 async function fetchWithRetry(url, options, retries = 3, initialDelay = 1000) {
@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     if (req.method !== 'POST') { return res.status(405).json({ error: 'Method Not Allowed' }); }
 
     try {
-        const { endpoint, prompt, model, jsonResponse, action, mimeType, base64Data } = req.body;
+        const { endpoint, prompt, model, jsonResponse, action, mimeType, base64Data, currentDate } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) { return res.status(500).json({ error: 'API key is not configured.' }); }
         
@@ -96,13 +96,18 @@ module.exports = async (req, res) => {
 
             } else if (action === 'generateListing') {
                  googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${multiModalModel}:generateContent?key=${apiKey}`;
-                 const listingPrompt = `Analyze the provided image of a handcrafted product. Your task is to generate content for a social media post. The response must be a valid JSON object with the following keys: "price" (a suggested price range in INR, e.g., "₹1,500 - ₹2,000"), "caption" (a warm and engaging social media caption of 2-3 paragraphs with 1-3 tasteful emojis), and "hashtags" (a comma-separated string of 5-7 relevant, trending hashtags).`;
+                 const listingPrompt = `You are an e-commerce pricing expert for Indian handicrafts, analyzing a product photo. It is currently ${currentDate} in India. Your task is to generate a realistic and fair market price and a social media post.
+
+Your response MUST be a valid JSON object with three keys:
+1. "price": A string for a suggested price range in INR (e.g., "₹1,200 - ₹1,500").
+2. "price_justification": A single, brief sentence explaining your pricing, considering the item's visible complexity, material, and artistic value.
+3. "social_post": A single string containing a warm, engaging social media caption (2-3 paragraphs with 1-3 tasteful emojis) followed by a new line and then a list of 5-7 relevant, trending hashtags, each starting with '#'.`;
+
                  payload = {
                     contents: [{ parts: [{ text: listingPrompt }, { inlineData: { mimeType, data: base64Data } }] }],
                     generationConfig: { responseMimeType: "application/json" }
                  };
                  
-                 // THIS IS THE CORRECTED LOGIC
                  const googleApiResponse = await fetchWithRetry(googleApiUrl, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
                  });
@@ -122,7 +127,6 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'Invalid endpoint specified.' });
         }
         
-        // This part is for 'text' and 'image' endpoints
         const googleApiResponse = await fetchWithRetry(googleApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
