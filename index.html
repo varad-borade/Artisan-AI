@@ -269,8 +269,10 @@
             
             <!-- Page: Visual Muse -->
             <div id="visual-muse" class="page active">
-                <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Visual Muse</h2>
-                <p class="text-stone-600 mb-8">Get visual inspiration for your next creation.</p>
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Visual Muse</h2>
+                    <p class="text-stone-600 max-w-2xl">Feeling uninspired? This tool helps break creative blocks by generating unique, AI-powered visual ideas based on current market trends. Select your craft, and let the AI provide you with fresh inspiration for your next masterpiece.</p>
+                </div>
                 <div class="card p-6">
                     <label for="craft-type-trend" class="block text-sm font-medium text-stone-700 mb-2">Select your craft:</label>
                     <select id="craft-type-trend" class="w-full max-w-sm p-3 border border-stone-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
@@ -288,8 +290,10 @@
 
             <!-- Page: Storyteller -->
             <div id="storyteller" class="page">
-                <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Storyteller</h2>
-                <p class="text-stone-600 mb-8">Generate beautiful, multilingual descriptions for your products.</p>
+                 <div class="mb-8">
+                    <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Storyteller</h2>
+                    <p class="text-stone-600 max-w-2xl">Struggling to find the right words? This tool is your personal copywriter. Simply describe your craft—you can even speak in your native language—and the AI will write a beautiful, professional product description in English, ready to captivate your customers.</p>
+                </div>
                 <div class="card p-6">
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -336,8 +340,10 @@
             
             <!-- Page: Marketplace Assistant -->
             <div id="marketplace-assistant" class="page">
-                 <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Marketplace Assistant</h2>
-                 <p class="text-stone-600 mb-8">Turn a raw photo into a complete, professional social media post.</p>
+                 <div class="mb-8">
+                    <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Marketplace Assistant</h2>
+                    <p class="text-stone-600 max-w-2xl">This is your one-click solution to turn a simple photo into a professional social media post. Follow the steps to enhance your photo, get a smart price suggestion, and generate a ready-to-use social media caption.</p>
+                 </div>
                  <div class="card p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         <!-- Left side: Stepper UI -->
@@ -388,7 +394,7 @@
                                     <div id="social-post-box" class="result-box min-h-[200px]">
                                        <p class="text-sm text-stone-500">Your social post will appear here.</p>
                                     </div>
-                                    <button class="copy-btn" data-target="social-post-box">Copy Post</button>
+                                    <button class="copy-btn" data-target="social-post-box-content">Copy Post</button>
                                 </div>
                             </div>
                         </div>
@@ -657,7 +663,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
             try {
                 const mimeType = uploadedImageBase64.substring(uploadedImageBase64.indexOf(":") + 1, uploadedImageBase64.indexOf(";"));
                 const base64Data = uploadedImageBase64.substring(uploadedImageBase64.indexOf(",") + 1);
-                 const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                 const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 const payload = { endpoint: 'marketplace', action: 'generateListing', mimeType, base64Data, currentDate };
                 const result = await callProxy(payload);
 
