@@ -425,7 +425,8 @@
             if (!response.ok) {
                 const errorBody = await response.json(); 
                 console.error('Error from proxy:', errorBody);
-                throw new Error(errorBody.error || `Proxy request failed`);
+                // Return a user-friendly error from the frontend
+                throw new Error("Sorry, the request to our AI partner failed. Please try again.");
             }
             return response.json();
         }
@@ -472,7 +473,7 @@
                 }
             } catch (error) {
                 console.error("Error in Trend Spotter:", error);
-                trendsResultBox.innerHTML = `<p class="col-span-full">${error.message}</p>`;
+                trendsResultBox.innerHTML = `<p class="col-span-full">Sorry, I had trouble finding inspiration right now. Please try again.</p>`;
             } finally {
                 getTrendsBtn.disabled = false;
                 getTrendsBtn.innerText = 'Get Visual Trends';
@@ -514,7 +515,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 const result = await callProxy(payload);
                 storyResultBox.innerText = result.candidates[0].content.parts[0].text;
             } catch (error) {
-                storyResultBox.innerText = error.message || "Sorry, I couldn't generate a description right now. Please try again.";
+                storyResultBox.innerText = "Sorry, I couldn't generate a description right now. Please try again.";
             } finally {
                 storyResultBox.classList.remove('loading');
                 generateStoryBtn.disabled = false;
@@ -633,7 +634,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 } else { throw new Error("Photo enhancement failed to return an image."); }
             } catch (error) {
                 console.error("Error enhancing photo:", error);
-                enhancedPhotoBox.innerHTML = `<p>${error.message}</p>`;
+                enhancedPhotoBox.innerHTML = `<p>Photo enhancement failed. Please try again.</p>`;
             } finally {
                 enhancedPhotoBox.classList.remove('loading');
             }
@@ -658,7 +659,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 } else { throw new Error("Failed to generate listing details."); }
             } catch (error) {
                 console.error("Error generating listing:", error);
-                listingDetailsBox.innerHTML = `<p>${error.message}</p>`;
+                listingDetailsBox.innerHTML = `<p>Could not generate listing details. Please try again.</p>`;
             } finally {
                 listingDetailsBox.classList.remove('loading');
             }
