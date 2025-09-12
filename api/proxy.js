@@ -41,7 +41,8 @@ module.exports = async (req, res) => {
                 const enhancePrompt = `Analyze the user-uploaded image of a handcrafted product. Your task is to generate a new, professional product photo of the item on a clean, minimalist, studio-lit white background. The new image should be photorealistic and appealing for an e-commerce marketplace.`;
                 payload = {
                     contents: [{ parts: [{ text: enhancePrompt }, { inlineData: { mimeType, data: base64Data } }] }],
-                    generationConfig: { responseModalities: ['IMAGE'] },
+                    // Corrected based on the error message.
+                    generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
                     model: `models/${imageModelForEnhance}`
                 };
 
@@ -52,7 +53,7 @@ module.exports = async (req, res) => {
                 if (!googleApiResponse.ok) { 
                     const errorText = await googleApiResponse.text();
                     console.error("Enhance photo API error:", errorText);
-                    throw new Error(`Photo enhancement failed: ${errorText}`); 
+                    throw new Error(`Photo enhancement failed.`); 
                 }
                 const responseData = await googleApiResponse.json();
                 const enhancedImage = responseData?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
@@ -60,6 +61,10 @@ module.exports = async (req, res) => {
                 if (enhancedImage) {
                     return res.status(200).json({ enhancedImage: `data:image/png;base64,${enhancedImage}` });
                 } else {
+                    if (responseData?.promptFeedback?.blockReason) {
+                        console.error("Enhance photo blocked for safety reasons:", responseData.promptFeedback.blockReason);
+                        throw new Error("The image could not be created due to safety policies.");
+                    }
                     throw new Error("Image enhancement failed to produce an image.");
                 }
 
@@ -96,7 +101,7 @@ module.exports = async (req, res) => {
         if (!googleApiResponse.ok) {
             const errorBody = await googleApiResponse.text();
             console.error('Google AI API Error:', errorBody);
-            return res.status(googleApiResponse.status).json({ error: `Google AI API request failed: ${errorBody}` });
+            return res.status(googleApiResponse.status).json({ error: `Google AI API request failed.` });
         }
 
         const responseData = await googleApiResponse.json();
@@ -117,7 +122,7 @@ module.exports = async (req, res) => {
 
     } catch (error) {
         console.error('Error in Vercel function:', error.message);
-        res.status(500).json({ error: error.message || 'An internal server error occurred.' });
+        res.status(500).json({ error: 'An internal server error occurred.' });
     }
 };
 
