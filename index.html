@@ -337,7 +337,7 @@
             <!-- Page: Marketplace Assistant -->
             <div id="marketplace-assistant" class="page">
                  <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Marketplace Assistant</h2>
-                 <p class="text-stone-600 mb-8">Turn a raw photo into a complete, professional marketplace listing.</p>
+                 <p class="text-stone-600 mb-8">Turn a raw photo into a complete, professional social media post.</p>
                  <div class="card p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         <!-- Left side: Stepper UI -->
@@ -369,20 +369,20 @@
                              <div id="step-3" class="mt-6 step-content hidden">
                                 <div class="step-indicator">
                                     <div id="step-3-circle" class="step-circle inactive">3</div>
-                                    <span class="text-stone-700">Generate Listing Details</span>
+                                    <span class="text-stone-700">Generate Social Post</span>
                                 </div>
-                                <button id="generate-listing-btn" class="btn-primary w-full mt-2" disabled>Generate Listing Details</button>
+                                <button id="generate-listing-btn" class="btn-primary w-full mt-2" disabled>Generate Social Post</button>
                              </div>
                         </div>
                         <!-- Right side: Results -->
                         <div>
                             <div id="listing-results-container" class="hidden sticky top-12">
-                                <h3 class="font-semibold text-stone-700 mb-2 text-lg">Your Listing is Ready:</h3>
+                                <h3 class="font-semibold text-stone-700 mb-2 text-lg">Your Post is Ready:</h3>
                                 <div id="enhanced-photo-box" class="result-box flex items-center justify-center p-4 min-h-[250px] mb-4">
                                     <p class="text-sm text-stone-500">Your enhanced photo will appear here.</p>
                                 </div>
                                 <div id="listing-details-box" class="result-box min-h-[200px]">
-                                   <p class="text-sm text-stone-500">Your listing details will appear here.</p>
+                                   <p class="text-sm text-stone-500">Your social post will appear here.</p>
                                 </div>
                             </div>
                         </div>
@@ -425,7 +425,6 @@
             if (!response.ok) {
                 const errorBody = await response.json(); 
                 console.error('Error from proxy:', errorBody);
-                // Return a user-friendly error from the frontend
                 throw new Error("Sorry, the request to our AI partner failed. Please try again.");
             }
             return response.json();
@@ -613,7 +612,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
         enhancePhotoBtn.addEventListener('click', async () => {
             if (!uploadedImageBase64) return;
             listingResultsContainer.style.display = 'block';
-            enhancedPhotoBox.innerHTML = '<div class="spinner"></div><p>Enhancing Photo...</p>';
+            enhancedPhotoBox.innerHTML = '<div class="spinner"></div><p class="text-sm">Enhancing Photo...</p>';
             enhancedPhotoBox.classList.add('loading');
             enhancePhotoBtn.disabled = true;
             
@@ -634,7 +633,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 } else { throw new Error("Photo enhancement failed to return an image."); }
             } catch (error) {
                 console.error("Error enhancing photo:", error);
-                enhancedPhotoBox.innerHTML = `<p>Photo enhancement failed. Please try again.</p>`;
+                enhancedPhotoBox.innerHTML = `<p class="text-red-600">Photo enhancement failed. Please try again.</p>`;
             } finally {
                 enhancedPhotoBox.classList.remove('loading');
             }
@@ -642,7 +641,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
 
         generateListingBtn.addEventListener('click', async () => {
             if (!uploadedImageBase64) return;
-            listingDetailsBox.innerHTML = '<div class="spinner"></div><p>Generating Details...</p>';
+            listingDetailsBox.innerHTML = '<div class="spinner"></div><p class="text-sm">Generating Post...</p>';
             listingDetailsBox.classList.add('loading');
             generateListingBtn.disabled = true;
 
@@ -653,13 +652,25 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 const result = await callProxy(payload);
 
                 if (result.listing) {
-                    listingDetailsBox.innerHTML = `<div class="result-box-wrapper"><button class="copy-btn" data-target="listing-details-box-content">Copy</button><div id="listing-details-box-content"><strong>Title:</strong> ${result.listing.title}\n\n<strong>Description:</strong> ${result.listing.description}\n\n<strong>Suggested Price:</strong> ${result.listing.price}\n\n<strong>Tags:</strong> ${result.listing.tags}</div></div>`;
+                    const listing = result.listing;
+                    listingDetailsBox.innerHTML = `
+                        <div class="result-box-wrapper">
+                            <button class="copy-btn" data-target="listing-details-box-content">Copy All</button>
+                            <div id="listing-details-box-content">
+                                <p class="font-semibold text-stone-800">Suggested Price:</p>
+                                <p class="mb-4 text-lg">${listing.price}</p>
+                                <p class="font-semibold text-stone-800">Social Media Caption:</p>
+                                <p class="mb-4">${listing.caption}</p>
+                                <p class="font-semibold text-stone-800">Hashtags:</p>
+                                <p class="text-sm text-stone-600">${listing.hashtags}</p>
+                            </div>
+                        </div>`;
                     step3Circle.classList.remove('active');
                     step3Circle.classList.add('complete');
                 } else { throw new Error("Failed to generate listing details."); }
             } catch (error) {
                 console.error("Error generating listing:", error);
-                listingDetailsBox.innerHTML = `<p>Could not generate listing details. Please try again.</p>`;
+                listingDetailsBox.innerHTML = `<p class="text-red-600">Could not generate social post. Please try again.</p>`;
             } finally {
                 listingDetailsBox.classList.remove('loading');
             }
