@@ -663,11 +663,15 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
             try {
                 const mimeType = uploadedImageBase64.substring(uploadedImageBase64.indexOf(":") + 1, uploadedImageBase64.indexOf(";"));
                 const base64Data = uploadedImageBase64.substring(uploadedImageBase64.indexOf(",") + 1);
-                 const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 const payload = { endpoint: 'marketplace', action: 'generateListing', mimeType, base64Data, currentDate };
                 const result = await callProxy(payload);
 
-                if (result.listing) {
+                if (result.listing && result.listing.error) {
+                    // This handles the AI's graceful refusal for non-handicraft items.
+                    priceBox.innerHTML = `<p class="text-orange-600 font-semibold">${result.listing.error}</p>`;
+                    socialPostBox.innerHTML = '';
+                } else if (result.listing) {
                     const listing = result.listing;
                     priceBox.innerHTML = `
                         <p class="text-sm font-semibold text-stone-800">Suggested Price</p>
@@ -678,10 +682,11 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                             <button class="copy-btn" data-target="social-post-box-content">Copy Post</button>
                             <div id="social-post-box-content">${listing.social_post}</div>
                         </div>`;
-
                     step3Circle.classList.remove('active');
                     step3Circle.classList.add('complete');
-                } else { throw new Error("Failed to generate listing details."); }
+                } else { 
+                    throw new Error("Failed to generate listing details."); 
+                }
             } catch (error) {
                 console.error("Error generating listing:", error);
                 priceBox.innerHTML = `<p class="text-red-600">Failed.</p>`;
