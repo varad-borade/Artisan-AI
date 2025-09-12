@@ -1,6 +1,35 @@
-// This is the final, complete Vercel Serverless Function.
-// It handles all three features: Visual Muse, Storyteller, and the multi-step Marketplace Assistant.
+// This is the final, complete, and robust Vercel Serverless Function.
+// It includes an intelligent retry mechanism (Exponential Backoff) to handle temporary model overloads.
 
+// Helper function for making API calls with retry logic
+async function fetchWithRetry(url, options, retries = 3, initialDelay = 1000) {
+    let delay = initialDelay;
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, options);
+            // If we get a 503 (Service Unavailable) error and we still have retries left...
+            if (response.status === 503 && i < retries - 1) {
+                console.warn(`Attempt ${i + 1}: Model overloaded (503). Retrying in ${delay / 1000}s...`);
+                await new Promise(res => setTimeout(res, delay));
+                delay *= 2; // Double the delay for the next retry (exponential backoff)
+                continue; // Go to the next iteration of the loop
+            }
+            return response; // Return the response if it's not a 503 or if we're out of retries
+        } catch (error) {
+            // This catches network errors, etc.
+             if (i < retries - 1) {
+                 console.warn(`Attempt ${i + 1}: Network error. Retrying in ${delay / 1000}s...`);
+                 await new Promise(res => setTimeout(res, delay));
+                 delay *= 2;
+                 continue;
+            }
+            throw error; // If all retries fail, throw the final error
+        }
+    }
+}
+
+
+// The main handler for all incoming requests
 module.exports = async (req, res) => {
     // Standard CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -45,7 +74,7 @@ module.exports = async (req, res) => {
                     model: `models/${imageModelForEnhance}`
                 };
 
-                const googleApiResponse = await fetch(googleApiUrl, {
+                const googleApiResponse = await fetchWithRetry(googleApiUrl, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
                 });
 
@@ -74,24 +103,12 @@ module.exports = async (req, res) => {
                     contents: [{ parts: [{ text: listingPrompt }, { inlineData: { mimeType, data: base64Data } }] }],
                     generationConfig: { responseMimeType: "application/json" }
                  };
-                 
-                 const googleApiResponse = await fetch(googleApiUrl, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-                 });
-                if (!googleApiResponse.ok) { throw new Error(await googleApiResponse.text()); }
-                const responseData = await googleApiResponse.json();
-                const listingJsonText = responseData.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const listing = JSON.parse(listingJsonText);
-                return res.status(200).json({ listing });
-            } else {
-                 return res.status(400).json({ error: 'Invalid marketplace action specified.' });
             }
         } else {
             return res.status(400).json({ error: 'Invalid endpoint specified.' });
         }
         
-        // This part is for 'text' and 'image' endpoints
-        const googleApiResponse = await fetch(googleApiUrl, {
+        const googleApiResponse = await fetchWithRetry(googleApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
