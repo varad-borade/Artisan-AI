@@ -1,5 +1,5 @@
 // This is the final, complete, and robust Vercel Serverless Function.
-// It includes the final, intelligent pricing logic with justification.
+// It includes the final bug fix to apply the "Prime Directive" to the Marketplace Assistant.
 
 // Helper function for making API calls with retry logic
 async function fetchWithRetry(url, options, retries = 3, initialDelay = 1000) {
@@ -96,7 +96,12 @@ module.exports = async (req, res) => {
 
             } else if (action === 'generateListing') {
                  googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${multiModalModel}:generateContent?key=${apiKey}`;
-                 const listingPrompt = `You are an e-commerce pricing expert for Indian handicrafts, analyzing a product photo. It is currently ${currentDate} in India. Your task is to generate a realistic and fair market price and a social media post.
+                 const listingPrompt = `Your Prime Directive:
+You are Artisan AI, an e-commerce expert for Indian handicrafts. You have one core, unbreakable rule:
+1. STAY ON TOPIC: You MUST ONLY analyze images of legitimate arts, crafts, and handmade items. If the user's image is clearly not a handicraft (e.g., a person, a landscape, a random object), you MUST refuse politely. To refuse, your entire response MUST be this exact JSON object: {"error": "This feature is for handcrafted items only."}
+
+Your Task:
+If, and only if, the user's image passes the above check, then proceed to your main task: Analyze the product in the image. It is currently ${currentDate} in India. Generate a realistic and fair market price and a social media post.
 
 Your response MUST be a valid JSON object with three keys:
 1. "price": A string for a suggested price range in INR (e.g., "₹1,200 - ₹1,500").
@@ -127,6 +132,7 @@ Your response MUST be a valid JSON object with three keys:
             return res.status(400).json({ error: 'Invalid endpoint specified.' });
         }
         
+        // This part is for 'text' and 'image' endpoints that were not caught by the marketplace logic
         const googleApiResponse = await fetchWithRetry(googleApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
