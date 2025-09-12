@@ -3,30 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artisan AI - Final Prototype</title>
+    <title>Artisan AI - The Winning Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --brand-color: #C2410C;
+            --brand-color-light: #FBEAE0;
+            --text-primary: #433A34;
+            --text-secondary: #57534E;
+            --bg-main: #FDFBF8;
+            --bg-card: #FFFFFF;
+            --border-color: #E7E2DD;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #FDFBF8;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D1C7BF' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            color: #433A34;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
         }
         .title-font { font-family: 'Playfair Display', serif; }
+        
+        /* Page Transition Animations */
+        .page { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .page.active { 
+            display: block; 
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: var(--brand-color-light);
+            color: var(--brand-color);
+        }
+        .sidebar-link.active {
+            background-color: var(--brand-color-light);
+            color: var(--brand-color);
+            font-weight: 600;
+        }
+        .sidebar-link svg {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
         .card {
-            background-color: white;
+            background-color: var(--bg-card);
             border-radius: 0.75rem;
-            border: 1px solid #E7E2DD;
+            border: 1px solid var(--border-color);
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.3s ease-in-out;
+            animation: slideUpFadeIn 0.6s ease-out forwards;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.07);
+        
+        @keyframes slideUpFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
         .btn-primary {
-            background-color: #C2410C;
+            background-color: var(--brand-color);
             color: white;
             font-weight: 500;
             padding: 0.75rem 1.5rem;
@@ -44,9 +91,7 @@
             background-color: #9ca3af;
             cursor: not-allowed;
         }
-        .result-box-wrapper {
-            position: relative;
-        }
+        .result-box-wrapper { position: relative; }
         .result-box {
             background-color: #F7F5F3;
             border-radius: 0.5rem;
@@ -54,10 +99,10 @@
             min-height: 150px;
             white-space: pre-line;
             font-family: 'Inter', sans-serif;
-            color: #57534E;
-            border: 1px solid #E7E2DD;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
             line-height: 1.6;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease-in-out;
         }
         .result-box.loading {
             display: flex;
@@ -65,14 +110,20 @@
             justify-content: center;
             flex-direction: column;
             gap: 1rem;
+            animation: pulseBg 2s infinite ease-in-out;
         }
+        @keyframes pulseBg {
+            0%, 100% { background-color: #F7F5F3; }
+            50% { background-color: #F3F1EF; }
+        }
+
         .copy-btn {
             position: absolute;
             top: 0.75rem;
             right: 0.75rem;
             background-color: #fff;
-            color: #C2410C;
-            border: 1px solid #E7E2DD;
+            color: var(--brand-color);
+            border: 1px solid var(--border-color);
             border-radius: 0.375rem;
             padding: 0.25rem 0.6rem;
             font-size: 0.75rem;
@@ -80,34 +131,23 @@
             cursor: pointer;
             transition: all 0.2s ease;
             opacity: 0;
+            visibility: hidden;
         }
         .result-box-wrapper:hover .copy-btn {
             opacity: 1;
-        }
-        .copy-btn:hover {
-            background-color: #FBEAE0;
+            visibility: visible;
         }
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            border-left-color: #C2410C;
+            border-left-color: var(--brand-color);
             animation: spin 1s ease infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        .icon-wrapper {
-            background-color: #FBEAE0;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #C2410C;
         }
         .trend-image {
             width: 100%;
@@ -115,96 +155,85 @@
             border-radius: 0.5rem;
             margin-top: 0.75rem;
             background-color: #e7e2dd;
+            border: 1px solid var(--border-color);
         }
-        #image-preview-container {
-            position: relative;
-            display: none;
-        }
-        #image-preview {
-            max-height: 300px;
-            width: auto;
-            border-radius: 0.5rem;
-        }
-        #remove-image-btn {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: white;
-            color: #C2410C;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .mic-btn {
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            border: 1px solid #E7E2DD;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+        .mic-btn:hover { background-color: var(--brand-color-light); color: var(--brand-color); }
+        .mic-btn.is-recording { color: #ef4444; animation: pulseMic 1.5s infinite; }
+        @keyframes pulseMic {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Header -->
-    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-200/50">
-        <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center">
-                <div class="icon-wrapper mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold title-font text-gray-800">Artisan AI</h1>
-                    <p class="text-stone-500 mt-1">Your Creative Partner for Digital Success</p>
+    <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <aside class="w-64 flex-shrink-0 border-r border-gray-200 bg-white">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 text-orange-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 T 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-xl font-bold title-font text-gray-800">Artisan AI</h1>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
+            <nav class="mt-6 px-4 space-y-2">
+                <a href="#visual-muse" class="sidebar-link active">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                    Visual Muse
+                </a>
+                <a href="#storyteller" class="sidebar-link">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    Storyteller
+                </a>
+                <a href="#marketplace-assistant" class="sidebar-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5A2.25 2.25 0 0011.25 11.25H4.5A2.25 2.25 0 002.25 13.5V21M6 4.5h12M6 4.5v-1.5A2.25 2.25 0 018.25 0h7.5A2.25 2.25 0 0118 2.25V4.5m-12 0h12M12 15.75h.008v.008H12v-.008z" /></svg>
+                    Marketplace Assistant
+                </a>
+            </nav>
+        </aside>
 
-    <!-- Main Content -->
-    <main class="py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                <!-- Feature 1: The Visual Trend Spotter -->
-                <div class="card p-6 lg:col-span-1 flex flex-col">
-                    <div class="flex items-center mb-4">
-                        <div class="icon-wrapper mr-4">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                        </div>
-                        <h2 class="text-2xl font-bold title-font text-gray-800">Visual Muse</h2>
-                    </div>
-                    <p class="text-stone-600 mb-6 flex-grow">Get visual inspiration for your next creation.</p>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12">
+            
+            <!-- Page: Visual Muse -->
+            <div id="visual-muse" class="page active">
+                <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Visual Muse</h2>
+                <p class="text-stone-600 mb-8">Get visual inspiration for your next creation.</p>
+                <div class="card p-6">
                     <label for="craft-type-trend" class="block text-sm font-medium text-stone-700 mb-2">Select your craft:</label>
-                    <select id="craft-type-trend" class="w-full p-3 border border-stone-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
-                        <option selected>Textiles (Weaving, Printing)</option>
-                        <option>Pottery & Ceramics</option>
-                        <option>Woodwork & Carving</option>
-                        <option>Jewelry Making</option>
-                        <option>Painting</option>
+                    <select id="craft-type-trend" class="w-full max-w-sm p-3 border border-stone-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                        <option selected>Textiles (Weaving, Printing)</option><option>Pottery & Ceramics</option><option>Woodwork & Carving</option><option>Jewelry Making</option><option>Painting</option>
                     </select>
-                    <button id="get-trends-btn" class="btn-primary w-full mt-4">Get Visual Trends</button>
-                    <div class="mt-6">
-                        <h3 class="font-semibold text-stone-700 mb-2">Creative Ideas:</h3>
-                        <div id="trends-result-box" class="result-box">Click the button to get the latest visual trends for your craft.</div>
+                    <button id="get-trends-btn" class="btn-primary mt-4">Get Visual Trends</button>
+                    <div class="mt-8">
+                        <h3 class="font-semibold text-stone-700 mb-2 text-lg">Creative Ideas:</h3>
+                        <div id="trends-result-box" class="result-box grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <p class="col-span-full">Click the button to get the latest visual trends for your craft.</p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Feature 2: The Storyteller -->
-                <div class="card p-6 lg:col-span-2">
-                     <div class="flex items-center mb-4">
-                        <div class="icon-wrapper mr-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-2xl font-bold title-font text-gray-800">The Storyteller</h2>
-                    </div>
-                    <p class="text-stone-600 mb-6">Generate beautiful descriptions for your products and your brand.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Page: Storyteller -->
+            <div id="storyteller" class="page">
+                <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Storyteller</h2>
+                <p class="text-stone-600 mb-8">Generate beautiful, multilingual descriptions for your products.</p>
+                <div class="card p-6">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                            <label for="artisan-name" class="block text-sm font-medium text-stone-700">Your Name / Brand Name:</label>
                            <input type="text" id="artisan-name" class="mt-1 w-full p-3 border border-stone-300 rounded-md" placeholder="e.g., Priya's Prints">
@@ -214,199 +243,174 @@
                            <input type="text" id="craft-type-story" class="mt-1 w-full p-3 border border-stone-300 rounded-md" placeholder="e.g., Sanganeri Block Printing">
                         </div>
                     </div>
-                     <div class="mt-4">
-                        <label for="inspiration" class="block text-sm font-medium text-stone-700">What makes your craft special?</label>
-                        <textarea id="inspiration" rows="3" class="mt-1 w-full p-3 border border-stone-300 rounded-md" placeholder="e.g., I use natural dyes from local flowers..."></textarea>
+                     <div class="mt-6">
+                        <div class="flex justify-between items-center mb-2 p-2 bg-gray-50 rounded-md border">
+                           <label for="inspiration" class="block text-sm font-medium text-stone-700">What makes your craft special?</label>
+                           <div class="flex items-center space-x-2">
+                                <select id="language-select" class="p-1 border border-stone-300 rounded-md text-sm bg-white">
+                                    <option value="en-US">English</option>
+                                    <option value="hi-IN">Hindi (हिन्दी)</option>
+                                    <option value="bn-IN">Bengali (বাংলা)</option>
+                                    <option value="ta-IN">Tamil (தமிழ்)</option>
+                                    <option value="te-IN">Telugu (తెలుగు)</option>
+                                    <option value="mr-IN">Marathi (मराठी)</option>
+                                </select>
+                                <button id="mic-btn" class="mic-btn" title="Start/Stop Recording">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                      <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                    </svg>
+                                </button>
+                           </div>
+                        </div>
+                        <textarea id="inspiration" rows="4" class="w-full p-3 border border-stone-300 rounded-md" placeholder="Speak or type here..."></textarea>
                     </div>
-                    <button id="generate-story-btn" class="btn-primary w-full mt-4">Generate Descriptions</button>
-                    <div class="mt-6">
-                        <h3 class="font-semibold text-stone-700 mb-2">Generated Product Description:</h3>
+                    <button id="generate-story-btn" class="btn-primary mt-6">Generate Description</button>
+                    <div class="mt-8">
+                        <h3 class="font-semibold text-stone-700 mb-2 text-lg">Generated Product Description:</h3>
                         <div class="result-box-wrapper">
                             <div id="story-result-box" class="result-box">Your generated product description will appear here.</div>
                             <button class="copy-btn" data-target="story-result-box">Copy</button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Feature 3: The Social Media Guru -->
-                <div class="card p-6 lg:col-span-3">
-                     <div class="flex items-center mb-4">
-                        <div class="icon-wrapper mr-4">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-2xl font-bold title-font text-gray-800">Social Media Guru</h2>
-                    </div>
-                    <p class="text-stone-600 mb-6">Generate platform-specific social media posts in seconds.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="product-name" class="block text-sm font-medium text-stone-700">Product Name (Optional):</label>
-                            <input type="text" id="product-name" class="mt-1 w-full p-3 border border-stone-300 rounded-md" placeholder="e.g., 'The Sunrise' Necklace">
-                            
-                            <label for="social-platform" class="block text-sm font-medium text-stone-700 mt-4">Social Media Platform:</label>
-                            <select id="social-platform" class="w-full p-3 border border-stone-300 rounded-md shadow-sm mt-1">
-                                <option selected>Instagram</option>
-                                <option>Facebook</option>
-                            </select>
-                        </div>
-                        <div>
-                            <div id="image-upload-area" class="flex justify-center px-6 pt-5 pb-6 border-2 h-full border-stone-300 border-dashed rounded-md bg-stone-50/50">
-                                <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-stone-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                                    <div class="flex text-sm text-stone-600"><label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-orange-700 hover:text-orange-800 focus-within:outline-none"><span>Upload product photo</span><input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg"></label></div>
-                                    <p class="text-xs text-stone-500">PNG, JPG up to 10MB</p>
-                                </div>
-                            </div>
-                            <div id="image-preview-container" class="mt-4 flex justify-center"><img id="image-preview" src="#" alt="Image preview" /><div id="remove-image-btn" title="Remove image">&times;</div></div>
-                        </div>
-                    </div>
-
-                    <button id="generate-social-btn" class="btn-primary w-full mt-6" disabled>Generate Social Post</button>
-                     <div class="mt-6">
-                        <h3 class="font-semibold text-stone-700 mb-2">Generated Post:</h3>
-                        <div class="result-box-wrapper">
-                            <div id="social-result-box" class="result-box">Upload a photo and click the button to generate a post.</div>
-                            <button class="copy-btn" data-target="social-result-box">Copy</button>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </div>
-    </main>
+
+            <!-- Page: Marketplace Assistant -->
+            <div id="marketplace-assistant" class="page">
+                 <h2 class="text-3xl font-bold title-font text-gray-800 mb-2">Marketplace Assistant</h2>
+                 <p class="text-stone-600 mb-8">Turn a raw photo into a complete, professional marketplace listing in one click.</p>
+                 <div class="card p-6">
+                    <div class="max-w-xl mx-auto text-center">
+                        <h3 class="text-lg font-semibold text-stone-700">Coming Soon!</h3>
+                        <p class="text-stone-600 mt-2">This feature is temporarily disabled to ensure the best performance for the hackathon. We're working on making it faster and more reliable!</p>
+                    </div>
+                 </div>
+            </div>
+
+        </main>
+    </div>
 
     <script>
-        // --- Global State & Configuration ---
-        const CLOUD_FUNCTION_URL = "/api/proxy";
-        let uploadedImageBase64 = null;
-
-        // --- Security & Utility Functions ---
-        function sanitizeInput(text) {
-            const element = document.createElement('div');
-            element.innerText = text;
-            return element.innerHTML;
+        // --- Page Navigation ---
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const pages = document.querySelectorAll('.page');
+        function showPage(hash) {
+            pages.forEach(page => page.classList.remove('active'));
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+            const targetPage = document.querySelector(hash);
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            if (targetPage) targetPage.classList.add('active');
+            if (targetLink) targetLink.classList.add('active');
         }
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = e.currentTarget.getAttribute('href');
+                window.location.hash = hash;
+                showPage(hash);
+            });
+        });
+        const initialHash = window.location.hash || '#visual-muse';
+        showPage(initialHash);
 
+        // --- UTILITY FUNCTIONS ---
         async function callProxy(payload) {
-            try {
-                const response = await fetch(CLOUD_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    console.error("Proxy Error Response:", await response.text());
-                    throw new Error(`Proxy request failed: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error("Error calling proxy function:", error);
-                return null;
+            const response = await fetch("/api/proxy", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error('Error from proxy:', errorBody);
+                throw new Error(`Proxy request failed: ${errorBody}`);
             }
+            return response.json();
         }
 
-        async function generateImage(prompt) {
-             const payload = { 
-                endpoint: 'text', 
-                model: 'gemini-2.0-flash-preview-image-generation', 
-                prompt 
-            };
-            const result = await callProxy(payload);
-            const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-            if (base64Data) {
-                return `data:image/png;base64,${base64Data}`;
-            }
-            // Handle cases where the model response is valid but contains a safety block
-            if (result && result.promptFeedback && result.promptFeedback.blockReason) {
-                console.warn(`Image generation blocked for safety reasons: ${result.promptFeedback.blockReason}`);
-            }
-            return null;
-        }
-
-        // --- Feature 1: Visual Trend Spotter Logic ---
+        // --- FEATURE 1: VISUAL MUSE ---
         const getTrendsBtn = document.getElementById('get-trends-btn');
         const trendsResultBox = document.getElementById('trends-result-box');
         const craftTypeTrendSelect = document.getElementById('craft-type-trend');
-
         getTrendsBtn.addEventListener('click', async () => {
             const selectedCraft = craftTypeTrendSelect.value;
-            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-            trendsResultBox.innerHTML = '<div class="spinner"></div><p>Generating creative ideas...</p>';
+            trendsResultBox.innerHTML = '<div class="spinner col-span-full"></div><p class="col-span-full text-center">Generating creative ideas...</p>';
             trendsResultBox.classList.add('loading');
             getTrendsBtn.disabled = true;
             getTrendsBtn.innerText = 'Inspiring...';
 
-            // FINAL FIX: Added a line to the prompt to guide the AI towards creating safer prompts.
-            const textPrompt = `You are a creative director for Indian artisans. Your task is to provide two distinct, simple, and actionable design ideas for the craft of "${selectedCraft}". It is currently ${today}, so focus on fresh and modern interpretations. For each idea, provide a short, inspiring description (one sentence) and a specific, detailed prompt for an AI image generator to create a visually appealing product photo. Crucially, ensure the generated image_prompt is descriptive and adheres to AI safety policies to avoid being blocked. Your response MUST be a valid JSON object, an array with two items, following this exact format: [{"idea_title": "...", "idea_description": "...", "image_prompt": "..."}, {"idea_title": "...", "idea_description": "...", "image_prompt": "..."}]`;
-
             try {
-                const payload = { 
-                    endpoint: 'text', 
-                    model: 'gemini-2.5-flash-preview-05-20', 
-                    prompt: textPrompt,
-                    // We need to tell the proxy to expect JSON back for this specific call
-                    jsonResponse: true 
+                const payload = {
+                    endpoint: 'text',
+                    model: 'gemini-2.5-flash-preview-05-20',
+                    jsonResponse: true, 
+                    prompt: `You are a creative director for Indian artisans. Your task is to provide two distinct, simple, and actionable design ideas for the craft of "${selectedCraft}". It is the current date, so focus on fresh and modern interpretations. For each idea, provide a short, inspiring description (one sentence) and a specific, detailed prompt for an AI image generator to create a visually appealing product photo. Ensure the image prompt is safe and avoids words that might be blocked by AI safety filters. Your response MUST be a valid JSON array of objects, with each object containing "idea_title", "idea_description", and "image_prompt" keys.`
                 };
-                const textResult = await callProxy(payload);
-
-                // The proxy now returns the parsed JSON directly
-                const trendData = textResult; 
-
+                let trendData = await callProxy(payload);
+                
+                if (typeof trendData === 'string') {
+                    trendData = JSON.parse(trendData);
+                }
+                if (!Array.isArray(trendData)) { trendData = [trendData]; }
+                if (!trendData || trendData.length === 0) throw new Error("No trend data received");
+                
                 trendsResultBox.innerHTML = '';
                 trendsResultBox.classList.remove('loading');
-
+                
                 for (const trend of trendData) {
                     const trendCard = document.createElement('div');
                     trendCard.className = 'mb-6';
                     trendCard.innerHTML = `<strong class="block text-lg">${trend.idea_title}</strong><p>${trend.idea_description}</p><img src="https://placehold.co/600x400/e7e2dd/433a34?text=Generating+Image..." class="trend-image" id="image-${trend.idea_title.replace(/\s+/g, '-')}">`;
                     trendsResultBox.appendChild(trendCard);
-
-                    const imageUrl = await generateImage(trend.image_prompt);
+                    
+                    const imagePayload = {
+                        endpoint: 'image',
+                        prompt: trend.image_prompt
+                    };
+                    const imageResult = await callProxy(imagePayload);
+                    const base64Data = imageResult?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                    const imageUrl = base64Data ? `data:image/png;base64,${base64Data}` : 'https://placehold.co/600x400/e7e2dd/c2410c?text=Image+Failed';
                     const imageElement = document.getElementById(`image-${trend.idea_title.replace(/\s+/g, '-')}`);
-                    if (imageUrl && imageElement) {
-                        imageElement.src = imageUrl;
-                    } else if (imageElement) {
-                        imageElement.src = 'https://placehold.co/600x400/e7e2dd/c2410c?text=Image+Failed';
-                    }
+                    if (imageElement) imageElement.src = imageUrl;
                 }
             } catch (error) {
                 console.error("Error in Trend Spotter:", error);
-                trendsResultBox.innerHTML = '<p>Sorry, I had trouble finding inspiration right now. Please try again.</p>';
-                trendsResultBox.classList.remove('loading');
+                trendsResultBox.innerHTML = '<p class="col-span-full">Sorry, I had trouble finding inspiration right now. Please try again.</p>';
             } finally {
                 getTrendsBtn.disabled = false;
                 getTrendsBtn.innerText = 'Get Visual Trends';
+                trendsResultBox.classList.remove('loading');
             }
         });
 
-        // --- Feature 2: Storyteller Logic ---
+        // --- FEATURE 2: STORYTELLER ---
         const generateStoryBtn = document.getElementById('generate-story-btn');
         const storyResultBox = document.getElementById('story-result-box');
         const artisanNameInput = document.getElementById('artisan-name');
         const craftTypeInput = document.getElementById('craft-type-story');
         const inspirationInput = document.getElementById('inspiration');
+        const micBtn = document.getElementById('mic-btn');
+        const languageSelect = document.getElementById('language-select');
 
         generateStoryBtn.addEventListener('click', async () => {
-            const artisanName = sanitizeInput(artisanNameInput.value);
-            const craftType = sanitizeInput(craftTypeInput.value);
-            const inspiration = sanitizeInput(inspirationInput.value);
-
+            const artisanName = artisanNameInput.value;
+            const craftType = craftTypeInput.value;
+            const inspiration = inspirationInput.value;
             if (!artisanName || !craftType || !inspiration) {
-                storyResultBox.innerText = "Please fill in all the details to generate a description.";
-                return;
+                storyResultBox.innerText = "Please fill in all the details to generate a description."; return;
             }
-            
-            storyResultBox.innerText = 'Generating your story...';
+            storyResultBox.innerHTML = '<div class="spinner"></div>';
             storyResultBox.classList.add('loading');
             generateStoryBtn.disabled = true;
             generateStoryBtn.innerText = 'Generating...';
 
-            const prompt = `You are a marketing expert for Indian artisans. Write a warm, authentic product description (50-70 words) based on this information. Do not add facts not present. Artisan/Brand: "${artisanName}", Craft: "${craftType}", Details: "${inspiration}". Generate the description.`;
-            
             try {
-                const payload = { endpoint: 'text', model: 'gemini-2.5-flash-preview-05-20', prompt };
+                const payload = {
+                    endpoint: 'text',
+                    model: 'gemini-2.5-flash-preview-05-20',
+                    prompt: `You are a marketing expert for an Indian artisan. The artisan has provided details, possibly in their local language (e.g., Hindi, Tamil, Hinglish). Your task is to: 1. Understand the core meaning of their input. 2. Write a warm, authentic, and compelling product description in polished English (about 50-70 words). Your response must ONLY be the product description itself. Do not add any introductory phrases, conversational text, or markdown formatting. Details: Artisan/Brand: "${artisanName}", Craft: "${craftType}", Special Details: "${inspiration}".`
+                };
                 const result = await callProxy(payload);
                 storyResultBox.innerText = result.candidates[0].content.parts[0].text;
             } catch (error) {
@@ -414,118 +418,56 @@
             } finally {
                 storyResultBox.classList.remove('loading');
                 generateStoryBtn.disabled = false;
-                generateStoryBtn.innerText = 'Generate Descriptions';
+                generateStoryBtn.innerText = 'Generate Description';
             }
         });
 
-        // --- Feature 3: Social Media Guru Logic ---
-        const fileUploadInput = document.getElementById('file-upload');
-        const imageUploadArea = document.getElementById('image-upload-area');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const removeImageBtn = document.getElementById('remove-image-btn');
-        const generateSocialBtn = document.getElementById('generate-social-btn');
-        const socialResultBox = document.getElementById('social-result-box');
-        const productNameInput = document.getElementById('product-name');
-        const socialPlatformSelect = document.getElementById('social-platform');
+        // Voice Support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            let recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
-        fileUploadInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uploadedImageBase64 = e.target.result;
-                    imagePreview.src = uploadedImageBase64;
-                    imageUploadArea.style.display = 'none';
-                    imagePreviewContainer.style.display = 'flex';
-                    generateSocialBtn.disabled = false;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        removeImageBtn.addEventListener('click', () => {
-            uploadedImageBase64 = null;
-            fileUploadInput.value = '';
-            imageUploadArea.style.display = 'flex';
-            imagePreviewContainer.style.display = 'none';
-            generateSocialBtn.disabled = true;
-        });
-
-        generateSocialBtn.addEventListener('click', async () => {
-            if (!uploadedImageBase64) {
-                socialResultBox.innerText = "Please upload an image first.";
-                return;
-            }
-
-            socialResultBox.innerHTML = '<div class="spinner"></div>';
-            socialResultBox.classList.add('loading');
-            generateSocialBtn.disabled = true;
-            generateSocialBtn.innerText = 'Generating...';
+            recognition.onresult = (event) => {
+                let finalTranscript = inspirationInput.value;
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                     if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                inspirationInput.value = finalTranscript.trim() + ' ';
+            };
             
-            const productName = sanitizeInput(productNameInput.value);
-            const platform = socialPlatformSelect.value;
-            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            recognition.onstart = () => micBtn.classList.add('is-recording');
+            recognition.onend = () => micBtn.classList.remove('is-recording');
+            recognition.onerror = (event) => { console.error('Speech recognition error', event.error); micBtn.classList.remove('is-recording'); };
 
-            const prompt = `You are a social media expert for Indian artisans. It is ${today}. Analyze the image of a handcrafted product.
-            Product Name (if provided): "${productName}".
-            Your task is to generate a post for ${platform}.
-            The post must be engaging, authentic, and designed to attract customers.
-            - The caption should evoke emotion and highlight the product's unique story and value.
-            - Include 1-3 tasteful emojis.
-            - Include a clear call to action.
-            - Provide a list of currently trending and relevant hashtags.
-            Your response MUST ONLY be the post content, with no extra conversational text or markdown.`;
-
-            const mimeType = uploadedImageBase64.substring(uploadedImageBase64.indexOf(":") + 1, uploadedImageBase64.indexOf(";"));
-            const base64Data = uploadedImageBase64.substring(uploadedImageBase64.indexOf(",") + 1);
-
-            try {
-                const payload = {
-                    endpoint: 'multimodal',
-                    prompt,
-                    base64Data,
-                    mimeType
-                };
-                const result = await callProxy(payload);
-                
-                let postText = result.candidates[0].content.parts[0].text;
-                socialResultBox.innerText = postText.trim();
-
-            } catch (error) {
-                console.error("Error in Social Media Guru:", error);
-                socialResultBox.innerText = "Sorry, I couldn't generate a post right now. Please try again.";
-            } finally {
-                socialResultBox.classList.remove('loading');
-                generateSocialBtn.disabled = false;
-                generateSocialBtn.innerText = 'Generate Social Post';
-            }
-        });
-
-        // --- Copy to Clipboard Logic ---
+            micBtn.addEventListener('click', () => {
+                if (micBtn.classList.contains('is-recording')) {
+                    recognition.stop();
+                } else {
+                    recognition.lang = languageSelect.value;
+                    recognition.start();
+                }
+            });
+        } else {
+            micBtn.parentElement.style.display = 'none';
+        }
+        
+        // --- COPY TO CLIPBOARD ---
         document.addEventListener('click', function (event) {
             if (event.target.classList.contains('copy-btn')) {
                 const targetId = event.target.dataset.target;
                 const targetElement = document.getElementById(targetId);
                 if (targetElement) {
-                    const tempTextarea = document.createElement('textarea');
-                    tempTextarea.value = targetElement.innerText;
-                    document.body.appendChild(tempTextarea);
-                    tempTextarea.select();
-                    try {
-                        document.execCommand('copy');
+                    navigator.clipboard.writeText(targetElement.innerText).then(() => {
                         event.target.innerText = 'Copied!';
                         setTimeout(() => { event.target.innerText = 'Copy'; }, 2000);
-                    } catch (err) {
-                        console.error('Failed to copy text: ', err);
-                        event.target.innerText = 'Failed';
-                    }
-                    document.body.removeChild(tempTextarea);
+                    }).catch(err => console.error('Failed to copy text: ', err));
                 }
             }
         });
-
-        console.log("Artisan AI App Initialized. All features are functional and polished.");
     </script>
 </body>
 </html>
