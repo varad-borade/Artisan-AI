@@ -1,5 +1,5 @@
 // This is the final, complete, and robust Vercel Serverless Function.
-// It includes an intelligent retry mechanism (Exponential Backoff) to handle temporary model overloads.
+// It includes the final bug fix for the Marketplace Assistant's "Generate Listing" action.
 
 // Helper function for making API calls with retry logic
 async function fetchWithRetry(url, options, retries = 3, initialDelay = 1000) {
@@ -7,23 +7,21 @@ async function fetchWithRetry(url, options, retries = 3, initialDelay = 1000) {
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(url, options);
-            // If we get a 503 (Service Unavailable) error and we still have retries left...
             if (response.status === 503 && i < retries - 1) {
                 console.warn(`Attempt ${i + 1}: Model overloaded (503). Retrying in ${delay / 1000}s...`);
                 await new Promise(res => setTimeout(res, delay));
-                delay *= 2; // Double the delay for the next retry (exponential backoff)
-                continue; // Go to the next iteration of the loop
+                delay *= 2; 
+                continue; 
             }
-            return response; // Return the response if it's not a 503 or if we're out of retries
+            return response;
         } catch (error) {
-            // This catches network errors, etc.
              if (i < retries - 1) {
                  console.warn(`Attempt ${i + 1}: Network error. Retrying in ${delay / 1000}s...`);
                  await new Promise(res => setTimeout(res, delay));
                  delay *= 2;
                  continue;
             }
-            throw error; // If all retries fail, throw the final error
+            throw error;
         }
     }
 }
@@ -103,11 +101,28 @@ module.exports = async (req, res) => {
                     contents: [{ parts: [{ text: listingPrompt }, { inlineData: { mimeType, data: base64Data } }] }],
                     generationConfig: { responseMimeType: "application/json" }
                  };
+                 
+                 // THIS IS THE CORRECTED LOGIC
+                 const googleApiResponse = await fetchWithRetry(googleApiUrl, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+                 });
+                if (!googleApiResponse.ok) { 
+                    const errorText = await googleApiResponse.text();
+                    console.error("Generate listing API error:", errorText);
+                    throw new Error('Could not generate listing details.');
+                }
+                const responseData = await googleApiResponse.json();
+                const listingJsonText = responseData.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const listing = JSON.parse(listingJsonText);
+                return res.status(200).json({ listing });
+            } else {
+                 return res.status(400).json({ error: 'Invalid marketplace action specified.' });
             }
         } else {
             return res.status(400).json({ error: 'Invalid endpoint specified.' });
         }
         
+        // This part is for 'text' and 'image' endpoints
         const googleApiResponse = await fetchWithRetry(googleApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
