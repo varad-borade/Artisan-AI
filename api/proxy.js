@@ -41,7 +41,6 @@ module.exports = async (req, res) => {
                 const enhancePrompt = `Analyze the user-uploaded image of a handcrafted product. Your task is to generate a new, professional product photo of the item on a clean, minimalist, studio-lit white background. The new image should be photorealistic and appealing for an e-commerce marketplace.`;
                 payload = {
                     contents: [{ parts: [{ text: enhancePrompt }, { inlineData: { mimeType, data: base64Data } }] }],
-                    // Corrected based on the error message.
                     generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
                     model: `models/${imageModelForEnhance}`
                 };
@@ -70,7 +69,7 @@ module.exports = async (req, res) => {
 
             } else if (action === 'generateListing') {
                  googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${multiModalModel}:generateContent?key=${apiKey}`;
-                 const listingPrompt = `Analyze the provided image of a handcrafted product. Your task is to generate a complete marketplace listing. The response must be a valid JSON object with the following keys: "title" (a short, catchy title), "description" (a warm, detailed 100-word description), "price" (a suggested price range in INR, e.g., "₹1,500 - ₹2,000"), and "tags" (a comma-separated string of 5-7 relevant keywords).`;
+                 const listingPrompt = `Analyze the provided image of a handcrafted product. Your task is to generate content for a social media post. The response must be a valid JSON object with the following keys: "price" (a suggested price range in INR, e.g., "₹1,500 - ₹2,000"), "caption" (a warm and engaging social media caption of 2-3 paragraphs with 1-3 tasteful emojis), and "hashtags" (a comma-separated string of 5-7 relevant, trending hashtags).`;
                  payload = {
                     contents: [{ parts: [{ text: listingPrompt }, { inlineData: { mimeType, data: base64Data } }] }],
                     generationConfig: { responseMimeType: "application/json" }
