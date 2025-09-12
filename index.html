@@ -378,11 +378,17 @@
                         <div>
                             <div id="listing-results-container" class="hidden sticky top-12">
                                 <h3 class="font-semibold text-stone-700 mb-2 text-lg">Your Post is Ready:</h3>
-                                <div id="enhanced-photo-box" class="result-box flex items-center justify-center p-4 min-h-[250px] mb-4">
+                                <div id="enhanced-photo-box" class="flex items-center justify-center p-2 mb-4 border rounded-lg bg-gray-50">
                                     <p class="text-sm text-stone-500">Your enhanced photo will appear here.</p>
                                 </div>
-                                <div id="listing-details-box" class="result-box min-h-[200px]">
-                                   <p class="text-sm text-stone-500">Your social post will appear here.</p>
+                                <div id="price-box" class="result-box mb-4">
+                                   <p class="text-sm text-stone-500">Your price suggestion will appear here.</p>
+                                </div>
+                                <div class="result-box-wrapper">
+                                    <div id="social-post-box" class="result-box min-h-[200px]">
+                                       <p class="text-sm text-stone-500">Your social post will appear here.</p>
+                                    </div>
+                                    <button class="copy-btn" data-target="social-post-box">Copy Post</button>
                                 </div>
                             </div>
                         </div>
@@ -559,7 +565,8 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
         const generateListingBtn = document.getElementById('generate-listing-btn');
         const listingResultsContainer = document.getElementById('listing-results-container');
         const enhancedPhotoBox = document.getElementById('enhanced-photo-box');
-        const listingDetailsBox = document.getElementById('listing-details-box');
+        const priceBox = document.getElementById('price-box');
+        const socialPostBox = document.getElementById('social-post-box');
         
         const step2Content = document.getElementById('step-2');
         const step3Content = document.getElementById('step-3');
@@ -623,7 +630,7 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 const result = await callProxy(payload);
                 enhancedImageBase64 = result.enhancedImage;
                 if (enhancedImageBase64) {
-                    enhancedPhotoBox.innerHTML = `<img src="${enhancedImageBase64}" alt="AI Enhanced Product Photo" class="marketplace-image">`;
+                    enhancedPhotoBox.innerHTML = `<img src="${enhancedImageBase64}" alt="AI Enhanced Product Photo" class="w-full h-auto rounded-lg">`;
                     step2Circle.classList.remove('active');
                     step2Circle.classList.add('complete');
                     step3Content.classList.remove('hidden');
@@ -641,38 +648,41 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
 
         generateListingBtn.addEventListener('click', async () => {
             if (!uploadedImageBase64) return;
-            listingDetailsBox.innerHTML = '<div class="spinner"></div><p class="text-sm">Generating Post...</p>';
-            listingDetailsBox.classList.add('loading');
+            priceBox.innerHTML = '<div class="spinner"></div>';
+            priceBox.classList.add('loading');
+            socialPostBox.innerHTML = '<div class="spinner"></div>';
+            socialPostBox.classList.add('loading');
             generateListingBtn.disabled = true;
 
             try {
                 const mimeType = uploadedImageBase64.substring(uploadedImageBase64.indexOf(":") + 1, uploadedImageBase64.indexOf(";"));
                 const base64Data = uploadedImageBase64.substring(uploadedImageBase64.indexOf(",") + 1);
-                const payload = { endpoint: 'marketplace', action: 'generateListing', mimeType, base64Data };
+                 const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                const payload = { endpoint: 'marketplace', action: 'generateListing', mimeType, base64Data, currentDate };
                 const result = await callProxy(payload);
 
                 if (result.listing) {
                     const listing = result.listing;
-                    listingDetailsBox.innerHTML = `
-                        <div class="result-box-wrapper">
-                            <button class="copy-btn" data-target="listing-details-box-content">Copy All</button>
-                            <div id="listing-details-box-content">
-                                <p class="font-semibold text-stone-800">Suggested Price:</p>
-                                <p class="mb-4 text-lg">${listing.price}</p>
-                                <p class="font-semibold text-stone-800">Social Media Caption:</p>
-                                <p class="mb-4">${listing.caption}</p>
-                                <p class="font-semibold text-stone-800">Hashtags:</p>
-                                <p class="text-sm text-stone-600">${listing.hashtags}</p>
-                            </div>
+                    priceBox.innerHTML = `
+                        <p class="text-sm font-semibold text-stone-800">Suggested Price</p>
+                        <p class="text-2xl font-bold text-stone-900">${listing.price}</p>
+                        <p class="text-xs text-stone-500 italic mt-1">${listing.price_justification}</p>`;
+                    socialPostBox.innerHTML = `
+                        <div class="result-box-wrapper h-full">
+                            <button class="copy-btn" data-target="social-post-box-content">Copy Post</button>
+                            <div id="social-post-box-content">${listing.social_post}</div>
                         </div>`;
+
                     step3Circle.classList.remove('active');
                     step3Circle.classList.add('complete');
                 } else { throw new Error("Failed to generate listing details."); }
             } catch (error) {
                 console.error("Error generating listing:", error);
-                listingDetailsBox.innerHTML = `<p class="text-red-600">Could not generate social post. Please try again.</p>`;
+                priceBox.innerHTML = `<p class="text-red-600">Failed.</p>`;
+                socialPostBox.innerHTML = `<p class="text-red-600">Could not generate social post. Please try again.</p>`;
             } finally {
-                listingDetailsBox.classList.remove('loading');
+                priceBox.classList.remove('loading');
+                socialPostBox.classList.remove('loading');
             }
         });
         
@@ -684,7 +694,10 @@ User's Details: - Artisan/Brand: "${artisanName}" - Craft: "${craftType}" - Spec
                 if (targetElement) {
                     navigator.clipboard.writeText(targetElement.innerText).then(() => {
                         event.target.innerText = 'Copied!';
-                        setTimeout(() => { event.target.innerText = 'Copy'; }, 2000);
+                        setTimeout(() => { 
+                            if(targetId === 'social-post-box-content') { event.target.innerText = 'Copy Post'; }
+                            else { event.target.innerText = 'Copy'; }
+                        }, 2000);
                     }).catch(err => console.error('Failed to copy text: ', err));
                 }
             }
