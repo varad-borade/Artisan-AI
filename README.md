@@ -113,14 +113,15 @@ To illustrate the user experience and feature outputs:
 ---
 
 ## 📂 Project Structure
+
 ArtisanAI/
-├── public/                 # Static assets (images, favicon, etc.)
+├── public/              # Static assets (images, favicon, etc.)
 ├── api/
-│   └── proxy.js            # Secure Node.js serverless function (AI API proxy)
-├── index.html              # Main application frontend
+│   └── proxy.js         # Secure Node.js serverless function (AI API proxy)
+├── index.html           # Main application frontend
 ├── assets/
-│   └── screenshots/        # Project screenshots for README
-└── README.md               # Project documentation
+├── screenshots/         # Project screenshots for README
+└── README.md            # Project documentation
 
 ---
 
