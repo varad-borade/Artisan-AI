@@ -112,8 +112,8 @@ To illustrate the user experience and feature outputs:
 
 ---
 
-## 📂 Project Structure
-
+<h2>📂 Project Structure</h2>
+<pre>
 ArtisanAI/
 ├── public/              # Static assets (images, favicon, etc.)
 ├── api/
@@ -122,6 +122,8 @@ ArtisanAI/
 ├── assets/
 ├── screenshots/         # Project screenshots for README
 └── README.md            # Project documentation
+</pre>
+
 
 
 ---
