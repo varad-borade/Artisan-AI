@@ -12,7 +12,7 @@
 ## 🚀 Live Demo
 
 Experience Artisan AI in action:
-🔗 [**https://artisan-ai-varad-borade.vercel.app/**](https://artisan-ai-varad-borade.vercel.app/)
+🔗 [**https://artisan-ai-varad-borade.vercel.app/**](https://artisan-ai-five.vercel.app/)
 
 ---
 
@@ -113,3 +113,28 @@ To illustrate the user experience and feature outputs:
 ---
 
 ## 📂 Project Structure
+ArtisanAI/
+├── public/                 # Static assets (images, favicon, etc.)
+├── api/
+│   └── proxy.js            # Secure Node.js serverless function (AI API proxy)
+├── index.html              # Main application frontend
+├── assets/
+│   └── screenshots/        # Project screenshots for README
+└── README.md               # Project documentation
+
+---
+
+## 📄 License
+
+This project is open-source and available under the **MIT License**.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to:
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature-xyz`).
+3.  Commit your changes (`git commit -m 'Add new feature'`).
+4.  Push to the branch (`git push origin feature-xyz`).
+5.  Submit a Pull Request.
