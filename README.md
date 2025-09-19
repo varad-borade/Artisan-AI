@@ -120,7 +120,7 @@ ArtisanAI/
 │   └── proxy.js         # Secure Node.js serverless function (AI API proxy)
 ├── index.html           # Main application frontend
 ├── assets/
-├── screenshots/         # Project screenshots for README
+│   └── screenshots/         # Project screenshots for README
 └── README.md            # Project documentation
 </pre>
 
